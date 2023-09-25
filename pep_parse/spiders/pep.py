@@ -23,12 +23,12 @@ class PepSpider(scrapy.Spider):
     def parse_pep(self, response):
         """Метод, обрабатывающий страницу конкретного PEP."""
         h1_tag = response.css('h1.page-title::text').get()
-        pattern = '^PEP\s*?(?P<number>\d+)\s*–\s*(?P<name>.*)$'
+        pattern = r'^PEP\s*?(?P<number>\d+)\s*–\s*(?P<name>.*)$'
         pep_match = re.search(pattern, h1_tag)
         number, name = pep_match.group('number'), pep_match.group('name')
 
         status_tag = response.css('dt.field-even + dd').get()
-        pattern_status = '.*?<abbr[^>]*>(?P<status>[^>]+)<\/abbr>'
+        pattern_status = r'.*?<abbr[^>]*>(?P<status>[^>]+)<\/abbr>'
         status_match = re.search(pattern_status, status_tag)
         status = status_match.group('status')
 
