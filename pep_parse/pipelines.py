@@ -1,4 +1,8 @@
-from .settings import BASE_DIR
+import csv
+import datetime
+from collections import defaultdict
+
+from .constants import BASE_DIR, RESULTS
 
 
 class PepParsePipeline:
@@ -7,29 +11,30 @@ class PepParsePipeline:
 
     def open_spider(self, spider):
         """Создает словарь для хранения статусов."""
-        self.status_dict = {}
+        self.status_dict = defaultdict(int)
 
     def process_item(self, item, spider):
         """Считает кол-во PEP для каждого статуса."""
         status = item['status']
-        if status not in self.status_dict.keys():
-            self.status_dict[status] = 1
-        else:
-            self.status_dict[status] += 1
+        self.status_dict[status] += 1
         return item
 
     def close_spider(self, spider):
         """Добавляет в .csv файл заголовок, данные о статусах
         и общее кол-во полученных PEP."""
+        time_str = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        file_name = f'status_summary_{time_str}.csv'
+        # Без BASE_DIR не проходят тесты :(
         with open(
-            f'{BASE_DIR}/results/status_summary_%(time)s.csv',
+            BASE_DIR / RESULTS / file_name,
             mode='w',
-            encoding='utf-8'
+            encoding='utf-8',
         ) as f:
-            print('Статус,Количество', file=f)
+            writer = csv.writer(f, lineterminator='\n')
+            writer.writerow(['Статус', 'Количество'])
             total = 0
             for status in self.status_dict:
-                print(status, self.status_dict[status], file=f)
+                writer.writerow([status, self.status_dict[status]])
                 total += int(self.status_dict[status])
-            print(f'Total,{total}', file=f)
+            writer.writerow(['Total', total])
         self.session.close()
