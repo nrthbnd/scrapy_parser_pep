@@ -24,7 +24,6 @@ class PepParsePipeline:
         и общее кол-во полученных PEP."""
         time_str = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         file_name = f'status_summary_{time_str}.csv'
-        # Без BASE_DIR не проходят тесты :(
         with open(
             BASE_DIR / RESULTS / file_name,
             mode='w',
@@ -32,9 +31,9 @@ class PepParsePipeline:
         ) as f:
             writer = csv.writer(f, lineterminator='\n')
             writer.writerow(['Статус', 'Количество'])
-            total = 0
-            for status in self.status_dict:
-                writer.writerow([status, self.status_dict[status]])
-                total += int(self.status_dict[status])
+            status_data = [
+                [status, count] for status, count in self.status_dict.items()]
+            writer.writerows(status_data)
+            total = sum(self.status_dict.values())
             writer.writerow(['Total', total])
         self.session.close()
