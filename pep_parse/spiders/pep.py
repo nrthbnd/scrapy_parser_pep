@@ -27,10 +27,8 @@ class PepSpider(scrapy.Spider):
         pep_match = re.search(pattern, h1_tag)
         number, name = pep_match.group('number'), pep_match.group('name')
 
-        status_tag = response.css('dt.field-even + dd').get()
-        pattern_status = r'.*?<abbr[^>]*>(?P<status>[^>]+)<\/abbr>'
-        status_match = re.search(pattern_status, status_tag)
-        status = status_match.group('status')
+        status = response.css(
+            'section#pep-content dt:contains("Status") + dd abbr::text').get()
 
         yield {
             'number': number,
